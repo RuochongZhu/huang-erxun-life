@@ -132,8 +132,13 @@ export function drawPersonalityCard(canvas, data, { portrait, qr }) {
     return y + lines.length * lineHeight;
   };
   block('黄二勋的传奇人参', margin, 34, 42, 56, contentWidth, 700);
+  const resultLabel = summary.resultLabel;
   let headerEnd;
-  if (summary.scored) {
+  if (resultLabel) {
+    headerEnd = block(resultLabel.title, 348, 142, 54, 74, 668, 700, 'left', palette.accent);
+    headerEnd = block(`${resultLabel.code}${resultLabel.provisional ? ' · 阶段称号' : ''}`, 348, headerEnd + 12, 28, 40, 668, 400, 'left', palette.muted);
+    if (summary.scored) headerEnd = block(`${summary.score} / ${summary.maxScore} · ${summary.provisional ? '阶段总分' : '人生总分'}`, 348, headerEnd + 12, 36, 50, 668, 700);
+  } else if (summary.scored) {
     block(summary.provisional ? '这一程的总分' : '人生总分', 348, 142, 32, 44, 668, 400, 'left', palette.muted);
     block(summary.score, 342, 186, 112, 132, 420, 750, 'left', palette.accent);
     const maxX = 342 + ctx.measureText(String(summary.score)).width + 22;
@@ -143,7 +148,12 @@ export function drawPersonalityCard(canvas, data, { portrait, qr }) {
     headerEnd = block(summary.title, 348, 166, 52, 70, 668, 700);
   }
   let y = Math.max(388, headerEnd) + 24;
-  if (summary.scored) y = block(summary.title, margin, y, 48, 64, contentWidth, 700) + 16;
+  if (resultLabel) {
+    y = block(resultLabel.quip, margin, y, 38, 56, contentWidth) + 14;
+    const basis = `结局 · ${resultLabel.ending.label}${resultLabel.band ? `  ×  ${resultLabel.band.id} · ${resultLabel.band.label}（${resultLabel.band.min}–${resultLabel.band.max} 分）` : ' · 未分段'}`;
+    y = block(basis, margin, y, 28, 42, contentWidth, 400, 'left', palette.muted) + 26;
+  }
+  if (summary.scored || resultLabel) y = block(summary.title, margin, y, resultLabel ? 40 : 48, resultLabel ? 56 : 64, contentWidth, 700) + 16;
   const personality = data.summary ? `${data.name} · ${data.title}${data.provisional ? '（暂定）' : ''}` : data.name;
   y = block(personality, margin, y, 32, 46, contentWidth, 400, 'left', palette.muted) + 16;
   y = block(summary.comment, margin, y, 38, 56, contentWidth) + 26;

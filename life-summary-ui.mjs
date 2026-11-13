@@ -1,6 +1,7 @@
 import { LIFE_VALUES, PRESSURE_LABELS } from './life-dynamics.mjs';
 import { formatProtagonistText } from './protagonist-copy.mjs';
 import { cleanStoryCopy } from './display-story-copy.mjs';
+import { SCORE_BANDS, getResultLabel } from './result-labels.mjs';
 
 const escape = value => formatProtagonistText(cleanStoryCopy(value)).replace(/[&<>"']/g,
   char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -10,7 +11,7 @@ const number = value => Number.isFinite(value) ? value : null;
 
 // Only present values already produced by the engine. Old saves deliberately
 // have no score: never reconstruct achievements from resources or personality.
-export function getLifeSummary(report) {
+export function getLifeSummary(report, state) {
   const score = report.lifeScore;
   const decisionCount = report.decisionCount ?? score?.decisionCount ?? 0;
   const tragedy = !!report.ifEpilogue?.tragedy;
@@ -25,6 +26,7 @@ export function getLifeSummary(report) {
     comment: report.ifEpilogue?.cardText || report.ifEpilogue?.text || score?.comment || report.lifePortrait?.text || report.ending?.text || '',
     provisional: !!(score?.provisional ?? report.early),
     decisionCount,
+    resultLabel: state ? getResultLabel(state, report) : report.resultLabel || null,
     values: hasScore ? (score.values || []).filter(item => Number.isFinite(item.value))
       .map(item => ({ ...item, value: number(item.value) })) : [],
     highlights: decisionCount && !tragedy ? (score?.highlights || []).filter(item => {
@@ -38,6 +40,26 @@ export function getLifeSummary(report) {
 export function valueRows(values = {}) {
   return LIFE_VALUES.filter(item => Number.isFinite(values[item.key]))
     .map(item => ({ ...item, value: number(values[item.key]) }));
+}
+
+export function resultLabelMarkup(label) {
+  if (!label) return '';
+  return `<div class="result-label" data-result-label="${escape(label.id)}">
+    <p class="result-label-quip">${escape(label.quip)}</p>
+    <details class="result-label-method"><summary>称号怎么来的</summary>
+      <dl class="result-label-basis"><div><dt>结局标签</dt><dd>${escape(label.ending.label)}<span>${escape(label.outcome)}</span></dd></div>
+      <div><dt>分段标签</dt><dd>${label.band ? `${escape(label.band.id)} · ${escape(label.band.label)}<span>${label.band.min}–${label.band.max} 分 · ${escape(label.band.quip)}</span>` : '未分段'}</dd></div></dl>
+      <p class="subtle">${escape(label.note)}</p>
+      ${label.band ? `<ol class="result-score-bands" aria-label="五个分数区间">${SCORE_BANDS.map(band => `<li${band.id === label.band.id ? ' aria-current="true"' : ''}><span>${band.id} · ${escape(band.label)}</span><span>${band.min}–${band.max} 分${band.id === label.band.id ? ' · 本局' : ''}</span></li>`).join('')}</ol>` : ''}
+    </details>
+  </div>`;
+}
+
+export function resultLabelTextLines(label) {
+  if (!label) return [];
+  return [`本局称号：${label.title}${label.provisional ? '（暂定）' : ''} · ${label.code}`, label.quip,
+    `结局标签：${label.ending.label} · ${label.outcome}`,
+    label.band ? `分段标签：${label.band.id} · ${label.band.label} · ${label.band.min}–${label.band.max} 分` : '分段标签：未分段', label.note];
 }
 
 export function lifeValuesMarkup(values, className = '') {
