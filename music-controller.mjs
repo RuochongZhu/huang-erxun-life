@@ -16,10 +16,9 @@ export function musicTrack(state, screen) {
 
 function paint() {
   if (!button) return;
-  const playing = started && !Sound.isMuted();
-  button.textContent = !supported ? '配乐暂不可用' : playing ? '♫ 配乐已开' : '♫ 开启配乐';
-  button.setAttribute('aria-pressed', String(playing));
-  button.setAttribute('aria-label', playing ? '关闭经济博士配乐' : '开启经济博士配乐');
+  const enabled = supported && !Sound.isMuted();
+  button.textContent = !supported ? '配乐暂不可用' : enabled ? '♫ 配乐已开' : '♫ 配乐已关';
+  button.setAttribute('aria-pressed', String(enabled));
   button.disabled = !supported;
 }
 
@@ -30,38 +29,41 @@ export function syncMusic(state, screen) {
 }
 
 function start() {
-  if (!supported || document.hidden) return;
+  if (!supported || document.hidden || Sound.isMuted()) return false;
+  if (started) return true;
   try {
     Sound.init();
-    started = true;
     Sound.bgm(track);
-    paint();
+    started = true;
+    return true;
   } catch {
-    if (button) button.textContent = '重试开启配乐';
+    return false;
   }
 }
 
+function resumeMusic() {
+  if (start()) Sound.resume().catch(() => {});
+}
+
 button?.addEventListener('click', () => {
-  if (!started) {
-    if (Sound.isMuted()) Sound.toggleMute();
-    start();
-  } else {
-    Sound.toggleMute();
-    (Sound.isMuted() ? Sound.pause() : Sound.resume()).catch(() => {});
-    paint();
-  }
+  if (Sound.toggleMute()) Sound.pause().catch(() => {});
+  else resumeMusic();
+  paint();
 });
 
-// Start only on an explicit interaction; saved mute preference is respected.
-document.addEventListener('click', event => {
-  if (event.target.closest('#music-toggle')) return;
-  if (!started && !Sound.isMuted()) start();
-});
+// Browsers may suspend audio until a user interaction.
+function resumeOnInteraction(event) {
+  if (!button?.contains(event.target)) resumeMusic();
+}
+document.addEventListener('click', resumeOnInteraction);
+document.addEventListener('keydown', resumeOnInteraction);
 document.addEventListener('visibilitychange', () => {
-  (document.hidden ? Sound.pause() : Sound.resume()).catch(() => {});
+  if (document.hidden) Sound.pause().catch(() => {});
+  else resumeMusic();
 });
 window.addEventListener('pagehide', () => { Sound.pause().catch(() => {}); });
-window.addEventListener('pageshow', () => {
-  if (!document.hidden) Sound.resume().catch(() => {});
+window.addEventListener('pageshow', event => {
+  if (event.persisted) resumeMusic();
 });
 paint();
+start();
