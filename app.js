@@ -1,3 +1,4 @@
+import { createAnalytics } from './analytics.mjs';
 import { syncMusic } from './music-controller.mjs';
 import { getSceneArt } from './scene-art.mjs';
 import { formatProtagonistText } from './protagonist-copy.mjs';
@@ -40,6 +41,7 @@ const announcement = document.querySelector('#announcement');
 const dialog = document.querySelector('#modal');
 const modalContent = document.querySelector('#modal-content');
 const formatPercent = new Intl.NumberFormat('zh-CN', { style: 'percent', maximumFractionDigits: 1 });
+const analytics = createAnalytics();
 
 let game = null;
 let screen = 'home';
@@ -605,6 +607,7 @@ function render(focus = false, focusResult = false) {
       main.innerHTML = renderHome();
     }
   }
+  if (screen === 'play' || screen === 'ending') analytics.observeGame(game, screen === 'ending' ? { report, summary: getLifeSummary(report) } : null);
   if (focus) {
     main.querySelector(focusResult ? '#result-title' : '.page-title')?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
@@ -977,6 +980,7 @@ document.addEventListener('submit', event => {
     const name = new FormData(event.target).get('nickname');
     const [seed] = crypto.getRandomValues(new Uint32Array(1));
     game = createGame(name, seed);
+    analytics.newGame(game);
     cardCache = null;
     closeModal(false);
     clockStart = null;
