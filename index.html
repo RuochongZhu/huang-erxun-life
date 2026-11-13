@@ -19,7 +19,19 @@
     </header>
     <p id="notice" class="notice" role="status" hidden></p>
     <main id="main" tabindex="-1">
-      <p class="loading">正在载入游戏……</p>
+      <div class="home">
+        <div class="home-opening">
+          <h1 class="page-title"><span class="title-phrase">黄二勋的</span><span class="title-phrase">传奇人参</span></h1>
+          <p class="home-intro">1973 年，你叫黄二勋，十岁，刚和哥哥来到美国读书。父母还在曼谷。你想写封信回家，却不知道该不该说自己想家。</p>
+        </div>
+        <figure class="home-art">
+          <div class="home-art-surface"><img src="./assets/jensen-guide.webp" width="768" height="768" alt="银发、眼镜和黑色皮夹克的黄二勋插画小人"></div>
+        </figure>
+        <div class="home-start" id="startup">
+          <p id="startup-status" role="status">正在载入游戏……</p>
+          <button id="startup-retry" class="btn" type="button" hidden>重新加载</button>
+        </div>
+      </div>
       <noscript><p class="loading">请启用 JavaScript 后重新打开本页。</p></noscript>
     </main>
   </div>
@@ -27,6 +39,28 @@
     <div id="modal-content"></div>
   </dialog>
   <div id="announcement" class="visually-hidden" role="status"></div>
-  <script type="module" src="./app.js"></script>
+  <script>
+    (function () {
+      var status = document.getElementById('startup-status');
+      var retry = document.getElementById('startup-retry');
+      function update(message) {
+        if (!status.isConnected) return;
+        status.textContent = message;
+        retry.hidden = false;
+      }
+      var slow = setTimeout(function () {
+        update('网络有点慢，游戏仍在载入。');
+      }, 8000);
+      function checkStartup(event) {
+        if (!event.target || event.target.id !== 'game-script') return;
+        clearTimeout(slow);
+        update('游戏未能载入，请重新加载。');
+      }
+      document.addEventListener('error', checkStartup, true);
+      document.addEventListener('load', checkStartup, true);
+      retry.addEventListener('click', function () { location.reload(); });
+    })();
+  </script>
+  <script type="module" id="game-script" src="./game-e1df90e12236.js"></script>
 </body>
 </html>
