@@ -13,8 +13,8 @@ import { lifeTrendsMarkup, bindLifeTrends } from './life-trends.mjs';
 import { getWeightedLifeHistory, WEIGHTED_LIFE_SCALE } from './life-overview.mjs';
 import { LIFE_VALUES } from './life-dynamics.mjs';
 import { renderSectionEmotion } from './section-emotion.mjs';
-import { createCardBlob, canShareCard, shareCard } from './card-export.mjs';
-import { getLifeSummary, lifeValuesMarkup, valueRows, pressureStateMarkup, scoreMethodMarkup, resultImpactMarkup, highlightsMarkup, impactTextLines } from './life-summary-ui.mjs';
+import { createCardBlob, canShareCard, shareCard, canCopyCard, copyCard } from './card-export.mjs';
+import { getLifeSummary, lifeValuesMarkup, valueRows, pressureStateMarkup, scoreMethodMarkup, resultImpactMarkup, highlightsMarkup, impactTextLines, resultLabelMarkup, resultLabelTextLines } from './life-summary-ui.mjs';
 import {
   ACTIVE_LIMIT_MS, commitChoice, continueGame, createGame, endEarly, getReport,
   previewChoice, validateSave, getScene, getChoicePlan, previewChoices, commitChoices,
@@ -57,7 +57,7 @@ let weightedLifeHistory = [];
 let cardCache = null;
 let cardPreviewURL = null;
 let cardRequest = 0;
-let cardSharing = false;
+let cardExportBusy = false;
 let viewedPrepReceipt;
 
 function resourceChartContent(key, selected) {
@@ -562,7 +562,7 @@ function dimensionGroups(dimensions) {
 function endingMarkup() {
   const { ending, archetype, dimensions, timeline, completedSteps, decisionCount, elapsedMs, early } = report;
   const portrait = report.lifePortrait ?? getLifePortrait(game);
-  const summary = getLifeSummary({ ...report, lifePortrait: portrait });
+  const summary = getLifeSummary({ ...report, lifePortrait: portrait }, game);
   const card = getPersonalityCard(game, report);
   const lifeTimeline = report.lifeTimeline ?? game.lifeJournal ?? [];
   const tragedy = !!report.ifEpilogue?.tragedy;
@@ -572,10 +572,14 @@ function endingMarkup() {
       <div class="summary-overview">
         <div class="summary-heading">
           ${tragedy ? '' : `<figure class="summary-portrait"><img src="${escapeHTML(card.art.src)}" width="768" height="768" alt="${escapeHTML(card.art.alt)}" data-personality-art="${escapeHTML(card.art.id)}"></figure>`}
-          <div>${summary.scored ? `<p class="summary-score-label">${summary.provisional ? '这一程的总分' : '人生总分'}</p><p class="summary-score"><strong>${summary.score}</strong><span> / ${summary.maxScore}</span></p>` : ''}
-            <h1 id="ending-title" class="page-title" tabindex="-1">${escapeHTML(summary.title)}</h1>
+          <div>
+            <h1 id="ending-title" class="page-title" tabindex="-1">${escapeHTML(summary.resultLabel?.title || summary.title)}</h1>
+            ${summary.resultLabel ? `<p class="result-label-code">${escapeHTML(summary.resultLabel.code)}${summary.resultLabel.provisional ? ' · 阶段称号' : ''}</p>` : ''}
+            ${summary.scored ? `<p class="summary-score"><strong>${summary.score}</strong><span> / ${summary.maxScore} · ${summary.provisional ? '阶段总分' : '人生总分'}</span></p>` : ''}
           </div>
         </div>
+        ${resultLabelMarkup(summary.resultLabel)}
+        ${summary.resultLabel ? `<h2 class="summary-story-title">${escapeHTML(summary.title)}</h2>` : ''}
         <p class="summary-comment">${escapeHTML(summary.comment)}</p>
         ${decisionCount && !tragedy ? `<p class="summary-personality">${escapeHTML(game.name)} · <span id="personality-title">${escapeHTML(card.title)}${card.provisional ? '（暂定）' : ''}</span></p>` : ''}
         ${early && game.endReason ? `<p class="summary-stop subtle">${escapeHTML(game.endReason)}</p>` : ''}
@@ -624,7 +628,7 @@ function render(focus = false, focusResult = false) {
       main.innerHTML = renderHome();
     }
   }
-  if (screen === 'play' || screen === 'ending') analytics.observeGame(game, screen === 'ending' ? { report, summary: getLifeSummary(report) } : null);
+  if (screen === 'play' || screen === 'ending') analytics.observeGame(game, screen === 'ending' ? { report, summary: getLifeSummary(report, game) } : null);
   if (focus) {
     main.querySelector(focusResult ? '#result-title' : '.page-title')?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
@@ -646,7 +650,7 @@ function openModal(kind, title, body, actions = '') {
 function closeModal(restoreClock = true) {
   if (activeDialog === 'card') {
     cardRequest++;
-    cardSharing = false;
+    cardExportBusy = false;
     if (cardPreviewURL) URL.revokeObjectURL(cardPreviewURL);
     cardPreviewURL = null;
   }
@@ -815,10 +819,11 @@ function exportReport() {
   if (screen !== 'ending' || !report) return;
   const { ending, archetype, dimensions, completedSteps, decisionCount, elapsedMs, timeline, early } = report;
   const portrait = report.lifePortrait ?? getLifePortrait(game);
-  const summary = getLifeSummary(report);
+  const summary = getLifeSummary(report, game);
   const lines = [
     '黄二勋的传奇人参｜人生手记',
     `${game.name} · ${early ? '阶段手记' : '人生手记'}`,
+    ...resultLabelTextLines(summary.resultLabel),
     portrait.title, portrait.text,
     ...(report.ifEpilogue ? [report.ifEpilogue.title, report.ifEpilogue.text] : []),
     ...(summary.scored ? [`总分 ${summary.score} / ${summary.maxScore} · ${summary.title}`, summary.comment,
@@ -874,7 +879,7 @@ async function showPersonalityCard() {
   if (screen !== 'ending' || !report || report.decisionCount <= 0 || dialog.open) return;
   const request = ++cardRequest;
   const currentGame = game;
-  const card = { ...getPersonalityCard(game, report), summary: getLifeSummary(report) };
+  const card = { ...getPersonalityCard(game, report), summary: getLifeSummary(report, game) };
   openModal('card', '你的分享卡', '<p role="status">正在生成图片……</p>', actionButton('close', '关闭'));
   try {
     if (cardCache?.state !== currentGame) {
@@ -886,14 +891,16 @@ async function showPersonalityCard() {
     if (request !== cardRequest || activeDialog !== 'card') return;
     cardPreviewURL = URL.createObjectURL(cardCache.blob);
     const nativeShare = canShareCard(cardCache.file);
+    const directCopy = canCopyCard(cardCache.blob);
     modalContent.innerHTML = `<div class="modal-head"><h2 id="modal-title" tabindex="-1">你的分享卡</h2></div>
-      <div class="modal-body"><img class="share-card-image" src="${cardPreviewURL}" alt="${escapeHTML(card.summary.title)}。${card.summary.scored ? `总分 ${card.summary.score} / ${card.summary.maxScore}。` : ''}${escapeHTML(card.summary.comment)}。带有网站入口二维码的人生总结。">
+      <div class="modal-body"><img class="share-card-image" src="${cardPreviewURL}" alt="${card.summary.resultLabel ? `${escapeHTML(card.summary.resultLabel.title)} · ${escapeHTML(card.summary.resultLabel.code)}。` : ''}${escapeHTML(card.summary.title)}。${card.summary.scored ? `总分 ${card.summary.score} / ${card.summary.maxScore}。` : ''}${escapeHTML(card.summary.comment)}。带有网站入口二维码的人生总结。">
         <p class="share-card-help">也可以长按图片保存，或 <a href="${cardPreviewURL}" target="_blank" rel="noopener">打开原图</a>。扫码开始新人生。</p>
       </div>
-      <div class="share-card-footer"><p id="card-status" class="subtle" role="status">${nativeShare ? '图片已生成，可以保存或分享。' : '图片已生成，可以保存后发给朋友。'}</p>
+      <div class="share-card-footer"><p id="card-status" class="subtle" role="status">${directCopy ? '图片已生成，可以直接复制后粘贴。' : nativeShare ? '图片已生成，可以保存或分享。' : '图片已生成，可以保存后发给朋友。'}</p>
         <div class="actions">${actionButton('close', '关闭')}
-          <a class="btn${nativeShare ? '' : ' primary'}" href="${cardPreviewURL}" download="黄二勋的传奇人参-人生总结.png" data-action="card-save">保存图片</a>
-          ${nativeShare ? actionButton('card-share', '分享图片', 'primary') : ''}
+          <a class="btn${nativeShare || directCopy ? '' : ' primary'}" href="${cardPreviewURL}" download="黄二勋的传奇人参-人生总结.png" data-action="card-save">保存图片</a>
+          ${directCopy ? actionButton('card-copy', '复制图片', 'primary') : ''}
+          ${nativeShare ? actionButton('card-share', '分享图片', directCopy ? '' : 'primary') : ''}
         </div>
       </div>`;
     modalContent.querySelector('#modal-title')?.focus({ preventScroll: true });
@@ -904,17 +911,35 @@ async function showPersonalityCard() {
   }
 }
 
-function shareCurrentCard() {
-  if (activeDialog !== 'card' || !cardCache || cardSharing) return;
+function setCardExportBusy(busy) {
+  cardExportBusy = busy;
+  for (const button of modalContent.querySelectorAll('[data-action="card-share"], [data-action="card-copy"]')) button.disabled = busy;
+}
+
+function copyCurrentCard() {
+  if (activeDialog !== 'card' || !cardCache || cardExportBusy) return;
   const request = cardRequest;
-  cardSharing = true;
-  const button = modalContent.querySelector('[data-action="card-share"]');
-  if (button) button.disabled = true;
+  setCardExportBusy(true);
+  modalContent.querySelector('#card-status').textContent = '正在复制图片……';
+  copyCard(cardCache.blob).then(result => {
+    if (request !== cardRequest || activeDialog !== 'card') return;
+    setCardExportBusy(false);
+    modalContent.querySelector('#card-status').textContent = {
+      copied: '已复制图片，可以粘贴了。',
+      failed: '未能复制图片，请重试或保存图片。',
+      unsupported: '当前浏览器不支持复制图片，请保存图片后分享。',
+    }[result];
+  });
+}
+
+function shareCurrentCard() {
+  if (activeDialog !== 'card' || !cardCache || cardExportBusy) return;
+  const request = cardRequest;
+  setCardExportBusy(true);
   // shareCard invokes navigator.share synchronously within this user's click.
   shareCard(cardCache.file).then(result => {
     if (request !== cardRequest || activeDialog !== 'card') return;
-    cardSharing = false;
-    if (button) button.disabled = false;
+    setCardExportBusy(false);
     modalContent.querySelector('#card-status').textContent = {
       shared: '已交给系统分享。', cancelled: '已取消分享，图片仍可保存或再次分享。',
       failed: '暂时无法调用分享，请保存图片或长按图片后分享。',
@@ -938,7 +963,7 @@ const actions = {
   'if-ending': showIfEnding, 'if-settle': () => settleIf(false),
   'if-tragedy-confirm': confirmIfTragedy, 'if-tragedy': () => settleIf(true),
   export: exportReport, home: returnHome,
-  card: showPersonalityCard, 'card-share': shareCurrentCard,
+  card: showPersonalityCard, 'card-share': shareCurrentCard, 'card-copy': copyCurrentCard,
   'card-retry': () => { closeModal(false); showPersonalityCard(); },
   'card-save': () => { const status = modalContent.querySelector('#card-status'); if (status) status.textContent = '已请求保存图片。如果未下载，可长按图片保存或打开原图。'; },
 };
