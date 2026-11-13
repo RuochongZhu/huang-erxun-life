@@ -1,0 +1,35 @@
+/* A margin note on the same handwritten page, not another card. */
+.section-emotion {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  margin-top: 1.1rem;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.75;
+}
+.section-emotion-face {
+  flex: 0 0 3.25rem;
+  width: 3.25rem;
+  height: 3.5rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+.section-emotion-silhouette { stroke-width: 1.4; }
+.section-emotion-copy { min-width: 0; }
+.section-emotion .section-emotion-person,
+.section-emotion .section-emotion-comment { margin: 0; font: inherit; overflow-wrap: anywhere; }
+.section-emotion .section-emotion-person {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.6em;
+  color: var(--muted);
+  font-size: 0.94em;
+}
+.section-emotion .section-emotion-comment { margin-top: 0.2rem; }
+.section-emotion-caption { margin-right: 0.6em; color: var(--muted); font-size: 0.88em; }
+.section-emotion-no-speaker .section-emotion-comment { margin: 0; }
+@media (max-width: 480px) {
+  .section-emotion { gap: 0.6rem; }
+  .section-emotion-face { flex-basis: 2.75rem; width: 2.75rem; height: 3rem; }
+}

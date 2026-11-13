@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f4f3ee"><title>黄二勋的人生可能性 · 再活一次</title>
+  <link rel="stylesheet" href="./atlas.css">
+</head>
+<body>
+  <header class="top"><a class="brand" href="./index.html">再活一次 <span>／ 人生可能性</span></a><a class="back" href="./map.html">决策分叉地图 ↗</a><a class="back" href="./index.html">进入试玩 ↗</a></header>
+  <main>
+    <div class="intro"><h1>人物与分支</h1><p>这里可以查看全部选项和结果，包含剧透。新游戏共 16 站，从 1973 年走到 2036 年。</p></div>
+    <nav class="tabs" aria-label="分支全览"><button data-tab="tree" aria-selected="true">生活分支与取舍</button><button data-tab="mechanics" aria-selected="false">游戏规则</button></nav>
+    <section id="tree-panel">
+      <p class="note">每个示例都由实际引擎从开局走到这里。选择不同的生活处境，会看到不同的关系、育儿和兴趣选项。完整的分流、合流与职业转向请查看 <a href="./map.html">决策地图</a>。</p>
+      <div class="controls"><label>人生节点<select id="step-select"></select></label><label>走到这里的生活<select id="route-select"></select></label><button id="reset-path" class="quiet">回到第一站</button></div>
+      <div id="tree-content" aria-live="polite"><p>正在展开人生分支…</p></div>
+    </section>
+    <section id="mechanics-panel" hidden>
+      <article class="mechanics"><h2>游戏规则</h2>
+      <div class="rules-grid">
+        <div><h3>生活、处境与选择证据</h3><p>亲密关系、婚育安排、兴趣习惯和照护方式各自保留。精力、压力与资金是现实约束。性格从你作出的选择中观察，最后分别回看生活各方面。</p></div>
+        <div><h3>十六站，每站三次选择</h3><p>从 1973 年到 2036 年，每站先处理生活中的事，再做准备、决定接下来的安排，共 48 次选择。你可以继续工作、东山再起，也可以退休、回到学术界、发展爱好或写传记。</p></div>
+        <div><h3>感情需要共同选择</h3><p>相处、结婚、是否育儿会在相应关系条件下展开。已经结婚的人，后来也可能与伴侣修复关系、分居或离婚。单身、两人生活与养育孩子都有自己的后续。</p></div>
+        <div><h3>准备改变现实机会</h3><p>部分职业决定有风险结果。技术、沟通、准备与疲劳共同影响概率，页面展示当时的条件。百分比是游戏设计值；生活里的付出也会占用这些精力和预算。</p></div>
+        <div><h3>往事留下可见后果</h3><p>少年时期是否练球，会影响中年重拾爱好的难度；与家里怎样通信，会影响后来求援；早期毕业去向影响以后遇见的问题。后续也可以补救、重新安排和改变习惯。</p></div>
+        <div><h3>时间和存档</h3><p>一局最多计时 26 分钟，时间到了就回看已经走过的经历。暂停或切走页面时不计时。新游戏共 16 站，到 2036 年；旧存档仍按原来的 12 站，到 2024 年。更早版本未记录的生活经历，从更新后的选择开始记。</p></div>
+      </div>
+      </article>
+    </section>
+  </main><footer>再活一次</footer>
+  <script type="module" src="./atlas.js"></script>
+</body></html>

@@ -1,0 +1,7 @@
+{
+  "title": "UCSL读博模拟器原配乐",
+  "source": "https://claude.ai/artifact/NUzd9fkegiZTYBNZkib6BW",
+  "audioSource": "https://adf88158-06e4-4464-a17c-eae6efa86355.frame.claudeusercontent.com/_f/1794018617-f832/js/audio.js",
+  "retrieved": "2026-11-13",
+  "changes": "ES module export, separate mute preference and page lifecycle controls. Original instruments, chord progressions, timing and procedural melody retained. No external audio requests."
+}

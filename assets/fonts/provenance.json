@@ -1,0 +1,249 @@
+{
+  "font": "霞鹜文楷 / LXGW WenKai Regular",
+  "source": {
+    "repository": "https://github.com/lxgw/LxgwWenKai",
+    "url": "https://raw.githubusercontent.com/lxgw/LxgwWenKai/main/fonts/TTF/LXGWWenKai-Regular.ttf",
+    "filename": "LXGWWenKai-Regular.ttf",
+    "bytes": 25928940,
+    "sha256": "2d73eea94ad808999d90c0000c239a84a33b09d4bc6ab6c5b8bbf1eda8a7fc8b",
+    "family": "LXGW WenKai",
+    "style": "Regular",
+    "version": "Version 1.530; October 18, 2026",
+    "postscriptName": "LXGWWenKai-Regular"
+  },
+  "license": {
+    "identifier": "OFL-1.1",
+    "url": "https://raw.githubusercontent.com/lxgw/LxgwWenKai/main/OFL.txt",
+    "file": "OFL.txt",
+    "sha256": "1a25e35da1031c6c3436fde545bb9cb5aca954e9873afe510c834b8b79bd21a0",
+    "reservedNames": "Kept under the bundled license's explicit web-subset permission."
+  },
+  "build": {
+    "script": "scripts/build-handwriting-font.py",
+    "command": "python3 scripts/build-handwriting-font.py /absolute/path/LXGWWenKai-Regular.ttf",
+    "fontToolsVersion": "4.60.2",
+    "format": "WOFF (zlib)",
+    "scope": "All dist/**/*.js and dist/**/*.mjs, decoded Unicode escapes, ASCII, and UI punctuation.",
+    "modifications": "Character subsetting and web-format conversion; no glyph outlines redesigned.",
+    "hinting": true,
+    "originalTimestampPreserved": true,
+    "sourceFiles": [
+      {
+        "path": "dist/analogues.mjs",
+        "sha256": "c870c4c7aa256026a08c3e0bc2f8a9b4519fbc04dc1a2fbfe2e144af60467f35"
+      },
+      {
+        "path": "dist/app.js",
+        "sha256": "8546ed65dc056c99465760239a374b4fdb8d1506ca5f314c5403d4725783db3c"
+      },
+      {
+        "path": "dist/atlas.js",
+        "sha256": "49c4dd26ed4d0821408311534294623dad169ec52c50a5aab1646741ec729fa5"
+      },
+      {
+        "path": "dist/card-export.mjs",
+        "sha256": "256de79ba6e3d305d3241af838583db92512627d6c63fdea8b3359759cb003b1"
+      },
+      {
+        "path": "dist/career-life.mjs",
+        "sha256": "022039c878a072ac1762cd777a516858472af9a5ee028a335592501cec7e9bb4"
+      },
+      {
+        "path": "dist/choice-compatibility.mjs",
+        "sha256": "ebcb3fc272405fa075f83904467d941159b92d87691520ddc702731e06764abb"
+      },
+      {
+        "path": "dist/choice-copy.mjs",
+        "sha256": "6dccb1680b64b5e82eb83cdd88406f331585b6c1e77f865dc961ebfc26460ae4"
+      },
+      {
+        "path": "dist/choice-plan.mjs",
+        "sha256": "5cc02c15a5c1554385a754bd2e2f8b3987bdc80b264845e07e6ef46be045f326"
+      },
+      {
+        "path": "dist/combined-choice.mjs",
+        "sha256": "1680eae09ff49c787b23ae60752416404effce7041ff3ce3e3628946a6f0432d"
+      },
+      {
+        "path": "dist/content.mjs",
+        "sha256": "6c28b5d2a2b37a25b9ccbcacb23dc74b92e0698443ff2aa4cfee9dea603ece59"
+      },
+      {
+        "path": "dist/continuity-memory.mjs",
+        "sha256": "ee36dbe5679966232aa0434a5c06214f1198d17e4cd93119fa2ea394d1860a6a"
+      },
+      {
+        "path": "dist/display-story-copy.mjs",
+        "sha256": "b29351cf53c640ba229e5c8067f38893bc98172927a6bd6c7663dfe19e5fa72f"
+      },
+      {
+        "path": "dist/economics-audio.mjs",
+        "sha256": "750597bab0c63773a4702cb26564ccfb1aeea3232e4aa4e7caf7c490a16a5b74"
+      },
+      {
+        "path": "dist/engine.mjs",
+        "sha256": "ca3d38e10393e527092a711ef6321a97eccb3d6688522fdd10fffdf9873753b2"
+      },
+      {
+        "path": "dist/if-card-art.mjs",
+        "sha256": "8284c82f768d2e9cc49b685f47bac2c047254d263ff6551292cbc6a0a05a1cc5"
+      },
+      {
+        "path": "dist/life-content.mjs",
+        "sha256": "579ed6d696c18d33baa92289f3cf8f1ad800d5cff0709336c3684b27b009e06f"
+      },
+      {
+        "path": "dist/life-dynamics.mjs",
+        "sha256": "723ab3d479275993c615ac2bf373fb8655a1bfcd328df5e8304fc087677ed877"
+      },
+      {
+        "path": "dist/life-engine.mjs",
+        "sha256": "7309e2f6ff0de31c3b066cbffbb9795b84992efaefcab1010314e80c18cfa3dc"
+      },
+      {
+        "path": "dist/life-feedback.mjs",
+        "sha256": "787ee6755e42ce878e48e92c0759548c103301820e996a613e492db13eed59b7"
+      },
+      {
+        "path": "dist/life-overview.mjs",
+        "sha256": "f2f6f75b98a1471f10a1a01cb3450f482f3756b72f9f084ad938420ba2aabf04"
+      },
+      {
+        "path": "dist/life-references.mjs",
+        "sha256": "a529cfce7bdd486e4e72869e3c46c808f6cfa3ccfcac3f5a90a63f40fccf1d62"
+      },
+      {
+        "path": "dist/life-summary-ui.mjs",
+        "sha256": "f174234963b514cb8a7ffd6623d8a02395b08b89325cdc40850a310c638ba6f5"
+      },
+      {
+        "path": "dist/life-trends.mjs",
+        "sha256": "80acf5d14d6155236d9d2bbcc9537de0fb226784e667db2bdbeffdd13af9ee89"
+      },
+      {
+        "path": "dist/map-app.js",
+        "sha256": "e822984e7e611b01f84bbb9f55bd8a47922700d2a33c918673c8fb9d03f1f302"
+      },
+      {
+        "path": "dist/map-model.mjs",
+        "sha256": "c895314d6f48f17f310d8316e9af338ef5367bd4847191ac5bc564a4fe962b31"
+      },
+      {
+        "path": "dist/music-controller.mjs",
+        "sha256": "df7606824c6931ce425e9dfe9926448383d316e8d40ea8da72a711f2d0799f01"
+      },
+      {
+        "path": "dist/narrative.mjs",
+        "sha256": "1d5927187609ebe03563bd9bd423c6a38335d9ae7c5aa9c82f5599d2fa657762"
+      },
+      {
+        "path": "dist/personality-art.mjs",
+        "sha256": "b322fc7680dd9266cf5e59febe9054cb4cabb670d9ec52dd6294b2d8fb5717c1"
+      },
+      {
+        "path": "dist/personality-card.mjs",
+        "sha256": "0c4a7b745cbfef352126ff18ac0497afb31827fc63cfb85798568fb7233ab8e8"
+      },
+      {
+        "path": "dist/protagonist-copy.mjs",
+        "sha256": "71887755fa19880c4fc54f6a48082a7cc883e1cb8263a38403ebdaedc8d4c5f6"
+      },
+      {
+        "path": "dist/resource-history.mjs",
+        "sha256": "b3bdf04235e12aea7403f7ab364564955ad5238f7f06373879f4ef0e4b54fde6"
+      },
+      {
+        "path": "dist/scene-art.mjs",
+        "sha256": "07bbee02977204abdcc06868626c88310ed3147a64f8e129c5848d8c39648e58"
+      },
+      {
+        "path": "dist/section-emotion.mjs",
+        "sha256": "6f9f6216a730a78481d9e43c6d07a0a12e691bef4a94c4366fffba22b083ab1a"
+      },
+      {
+        "path": "dist/story-affair.mjs",
+        "sha256": "8244f125f4a1b0ba5d355763ebec61b6ff83587d75774d6755cec603f5d053d4"
+      },
+      {
+        "path": "dist/story-company.mjs",
+        "sha256": "3d8d64fae6c7a63d9dddcf57674ac2282f877e42ba531880d631cb6927e6e633"
+      },
+      {
+        "path": "dist/story-continuity.mjs",
+        "sha256": "ec19183086b58e0c851bc47b0d7a7d3c8f270b5695f6700a5c1cb13d2752e030"
+      },
+      {
+        "path": "dist/story-dilemmas.mjs",
+        "sha256": "7f135cd592abc725862697119708645974e5a7b5f280f21a54798218f2510091"
+      },
+      {
+        "path": "dist/story-endings.mjs",
+        "sha256": "dd113a0974b28df7b634787d82fa1a81e9445fd6409039ce075c5b9aa4ab09a3"
+      },
+      {
+        "path": "dist/story-feedback.mjs",
+        "sha256": "e74e2d132d6074102d2b44f8af8ce5967830dcc19bf0299153e97f62cc970f00"
+      },
+      {
+        "path": "dist/story-if.mjs",
+        "sha256": "1948d0311d8399a67bc5fe4a6ef5456b714fd6ef7a121893789c51c859ad6976"
+      },
+      {
+        "path": "dist/story-layoff.mjs",
+        "sha256": "90b933e2cad2ab81690972d8d14c1dff683b562a52fb4133be5f1b0686e67666"
+      },
+      {
+        "path": "dist/story-relationships.mjs",
+        "sha256": "17b1bb48c2e7ec48f1d2e5dec0512950dba85e94aa034fcd0f45479717ef32e5"
+      },
+      {
+        "path": "dist/story-timeline.mjs",
+        "sha256": "8c1179d8e9c6830a93d18566913becd91a191037412196da56ee90327f60b89f"
+      }
+    ]
+  },
+  "subset": {
+    "requestedCodepoints": 1913,
+    "includedCodepoints": 1907,
+    "glyphs": 2114,
+    "unsupportedSourceCharacters": [
+      {
+        "codepoint": "U+202A",
+        "character": "‪",
+        "name": "LEFT-TO-RIGHT EMBEDDING"
+      },
+      {
+        "codepoint": "U+202E",
+        "character": "‮",
+        "name": "RIGHT-TO-LEFT OVERRIDE"
+      },
+      {
+        "codepoint": "U+202F",
+        "character": " ",
+        "name": "NARROW NO-BREAK SPACE"
+      },
+      {
+        "codepoint": "U+2066",
+        "character": "⁦",
+        "name": "LEFT-TO-RIGHT ISOLATE"
+      },
+      {
+        "codepoint": "U+2069",
+        "character": "⁩",
+        "name": "POP DIRECTIONAL ISOLATE"
+      },
+      {
+        "codepoint": "U+FEFF",
+        "character": "﻿",
+        "name": "ZERO WIDTH NO-BREAK SPACE"
+      }
+    ],
+    "fallback": "Characters absent from the original font, or later user input outside this subset, use the CSS fallback stack."
+  },
+  "output": {
+    "file": "life-handwriting.woff",
+    "bytes": 539388,
+    "sha256": "865de0d20c719cf109d9b8e5180334678bf700691c05f02b96d19968e6b2eee9",
+    "delivery": "Self-hosted web font only; no desktop TTF is distributed."
+  }
+}

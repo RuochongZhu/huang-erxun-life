@@ -1,0 +1,41 @@
+.life-trends { min-width: 0; }
+.life-trends-hint { color: var(--muted); font-size: .88rem; margin-block: .25rem .55rem; }
+.life-trend-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .3rem .55rem; }
+.life-trend-metrics button { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .15rem .3rem; min-width: 0; min-height: 2.75rem; padding: .35rem .55rem; color: var(--muted); background: none; border: 1px solid var(--rule); border-radius: .45rem; text-align: left; }
+.life-trend-metrics button > span { font-size: .9rem; }
+.life-trend-metrics button strong { color: var(--ink); font-size: 1.13rem; font-variant-numeric: tabular-nums; font-weight: 600; }
+.life-trend-metrics button:hover { background: var(--wash); }
+.life-trend-metrics button[aria-pressed="true"] { color: var(--accent); border-color: currentColor; background: var(--wash); }
+.life-trend-metrics button[aria-pressed="true"] strong { color: var(--accent); }
+.life-trend-metrics button:focus-visible, .life-trend-select select:focus-visible, .life-trend-mechanics > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.life-trend-caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem; margin-top: .85rem; color: var(--muted); font-size: .8rem; }
+.life-trend-caption > :first-child { color: var(--ink); }
+.life-trend-graph { display: block; width: 100%; height: auto; overflow: visible; margin-block: .3rem .7rem; }
+.life-trend-graph text { fill: var(--muted); font: 12px system-ui, sans-serif; }
+.life-trend-grid { stroke: var(--rule); stroke-width: 1; }
+.life-trend-fill { fill: var(--accent); opacity: .055; }
+.life-trend-line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.life-trend-event { fill: var(--paper); stroke: var(--accent); stroke-width: 1.5; }
+.life-trend-cursor { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 4; opacity: .45; }
+.life-trend-point { fill: var(--accent); stroke: var(--paper); stroke-width: 2; }
+.life-trend-select { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .7rem; color: var(--muted); font-size: .88rem; }
+.life-trend-select select { flex: 1; min-width: 0; max-width: 100%; min-height: 2.75rem; padding: .45rem .65rem; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: .45rem; font: inherit; }
+.life-trend-receipt { padding-top: .9rem; }
+.life-trend-receipt-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem; color: var(--muted); font-size: .84rem; font-variant-numeric: tabular-nums; }
+.life-trend-receipt-heading strong { color: var(--accent); font-weight: 650; }
+.life-trend-choice { margin-top: .35rem !important; font-size: .97rem; line-height: 1.7; overflow-wrap: anywhere; }
+.life-trend-extras { margin-top: .35rem !important; font-size: .85rem; color: var(--muted); line-height: 1.7; }
+.life-trend-turn { margin-top: .65rem !important; font-size: .88rem; line-height: 1.7; }
+.life-trend-turn > span:last-child { color: var(--muted); }
+.life-trend-mechanics { margin-top: .6rem; font-size: .88rem; }
+.life-trend-mechanics > summary { min-height: 2.75rem; padding-block: .7rem; color: var(--accent); cursor: pointer; }
+.life-trend-mechanics > p { margin: .3rem 0 .65rem !important; line-height: 1.8; }
+.life-trend-context, .life-trend-weight { color: var(--muted); }
+.life-trend-empty { padding-block: .8rem .3rem; color: var(--muted); font-size: .95rem; line-height: 1.8; }
+@media (max-width: 620px) {
+  .life-trend-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .life-trend-graph { min-height: 8rem; }
+  .life-trend-graph text { font-size: 19px; }
+  .life-trend-select { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .life-trend-select select { width: 100%; }
+}
