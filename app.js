@@ -893,7 +893,7 @@ async function showPersonalityCard() {
     const nativeShare = canShareCard(cardCache.file);
     const directCopy = canCopyCard(cardCache.blob);
     modalContent.innerHTML = `<div class="modal-head"><h2 id="modal-title" tabindex="-1">你的分享卡</h2></div>
-      <div class="modal-body"><img class="share-card-image" src="${cardPreviewURL}" alt="${card.summary.resultLabel ? `${escapeHTML(card.summary.resultLabel.title)} · ${escapeHTML(card.summary.resultLabel.code)}。` : ''}${escapeHTML(card.summary.title)}。${card.summary.scored ? `总分 ${card.summary.score} / ${card.summary.maxScore}。` : ''}${escapeHTML(card.summary.comment)}。带有网站入口二维码的人生总结。">
+      <div class="modal-body"><img class="share-card-image" src="${cardPreviewURL}" alt="${escapeHTML(card.summary.resultLabel?.title || card.summary.title)}。${card.summary.scored ? `总分 ${card.summary.score} / ${card.summary.maxScore}。` : ''}${card.summary.resultLabel ? `${escapeHTML(card.summary.resultLabel.quip)}${escapeHTML(card.summary.title)}。` : ''}${escapeHTML(card.summary.comment)}。带有网站入口二维码的人生总结。">
         <p class="share-card-help">也可以长按图片保存，或 <a href="${cardPreviewURL}" target="_blank" rel="noopener">打开原图</a>。扫码开始新人生。</p>
       </div>
       <div class="share-card-footer"><p id="card-status" class="subtle" role="status">${directCopy ? '图片已生成，可以直接复制后粘贴。' : nativeShare ? '图片已生成，可以保存或分享。' : '图片已生成，可以保存后发给朋友。'}</p>

@@ -1,9 +1,10 @@
 // Personality copy uses the same observations as the 16-dimension report.
-// A future scene may supply its own art and palette without changing that assessment.
+// The ending can supply its own art and palette without changing that assessment.
 import { formatProtagonistText } from './protagonist-copy.mjs';
 import { cleanStoryCopy } from './display-story-copy.mjs';
 import { getPersonalityArt } from './personality-art.mjs';
 import { getIfCardArt } from './if-card-art.mjs';
+import { getResultLabel } from './result-labels.mjs';
 
 export const SITE_URL = 'https://play.socialai.buzz/';
 export const PORTRAIT_URL = new URL('./assets/jensen-guide.webp', import.meta.url).href;
@@ -28,6 +29,8 @@ const HABITS = [
   ['事情过后，你习惯想想哪里可以改进', '一件事结束，你就开始准备下一件'],
 ];
 const confidenceRank = { '充分': 3, '初步': 2, '有限': 1, '未观察': 0 };
+// The neon palette belongs to the completed, fantastical outcomes.
+const DARK_CARD_ENDINGS = new Set(['nightlife_success', 'research_global', 'president_elected', 'solar_city']);
 
 export function getPersonalityCard(state, report) {
   const dimensions = report.dimensions.filter(d => d.score !== null)
@@ -67,7 +70,7 @@ export function getPersonalityCard(state, report) {
   return {
     name: state.name, title: report.archetype.title.replace('（暂定）', ''), intro,
     art: getIfCardArt(state, report) || getPersonalityArt(report),
-    era: state.storyEdition === '2026.11' && state.step >= 12 ? 'if' : 'past',
+    era: DARK_CARD_ENDINGS.has(getResultLabel(state, report).ending.id) ? 'if' : 'past',
     provisional, traits, receipts, decisionCount: report.decisionCount,
     completedSteps: report.completedSteps,
     note: '本局选择的趣味画像', siteURL: SITE_URL,
@@ -133,29 +136,23 @@ export function drawPersonalityCard(canvas, data, { portrait, qr }) {
   };
   block('黄二勋的传奇人参', margin, 34, 42, 56, contentWidth, 700);
   const resultLabel = summary.resultLabel;
-  let headerEnd;
-  if (resultLabel) {
-    headerEnd = block(resultLabel.title, 348, 142, 54, 74, 668, 700, 'left', palette.accent);
-    headerEnd = block(`${resultLabel.code}${resultLabel.provisional ? ' · 阶段称号' : ''}`, 348, headerEnd + 12, 28, 40, 668, 400, 'left', palette.muted);
-    if (summary.scored) headerEnd = block(`${summary.score} / ${summary.maxScore} · ${summary.provisional ? '阶段总分' : '人生总分'}`, 348, headerEnd + 12, 36, 50, 668, 700);
-  } else if (summary.scored) {
-    block(summary.provisional ? '这一程的总分' : '人生总分', 348, 142, 32, 44, 668, 400, 'left', palette.muted);
-    block(summary.score, 342, 186, 112, 132, 420, 750, 'left', palette.accent);
-    const maxX = 342 + ctx.measureText(String(summary.score)).width + 22;
-    block(`/ ${summary.maxScore}`, maxX, 250, 34, 48, width - margin - maxX, 400, 'left', palette.muted);
-    headerEnd = 388;
-  } else {
-    headerEnd = block(summary.title, 348, 166, 52, 70, 668, 700);
+  const portraitTop = 138, portraitSize = 244;
+  const headerX = 348, headerWidth = width - margin - headerX;
+  const headerStart = blocks.length;
+  let headerEnd = block(resultLabel?.title || summary.title, headerX, portraitTop, 54, 74, headerWidth, 700, 'left', palette.accent);
+  if (summary.scored) {
+    const scoreLabel = summary.provisional ? '阶段总分' : '人生总分';
+    headerEnd = block(`${summary.score} / ${summary.maxScore} · ${scoreLabel}`, headerX, headerEnd + 10, 42, 58, headerWidth, 700);
   }
-  let y = Math.max(388, headerEnd) + 24;
+  const portraitBottom = portraitTop + portraitSize;
+  const headerOffset = Math.max(0, (portraitBottom - headerEnd) / 2);
+  for (const item of blocks.slice(headerStart)) item.y += headerOffset;
+
+  let y = Math.max(portraitBottom, headerEnd + headerOffset) + 30;
   if (resultLabel) {
-    y = block(resultLabel.quip, margin, y, 38, 56, contentWidth) + 14;
-    const basis = `结局 · ${resultLabel.ending.label}${resultLabel.band ? `  ×  ${resultLabel.band.id} · ${resultLabel.band.label}（${resultLabel.band.min}–${resultLabel.band.max} 分）` : ' · 未分段'}`;
-    y = block(basis, margin, y, 28, 42, contentWidth, 400, 'left', palette.muted) + 26;
+    y = block(resultLabel.quip, margin, y, 38, 56, contentWidth) + 22;
+    y = block(summary.title, margin, y, 40, 56, contentWidth, 700) + 16;
   }
-  if (summary.scored || resultLabel) y = block(summary.title, margin, y, resultLabel ? 40 : 48, resultLabel ? 56 : 64, contentWidth, 700) + 16;
-  const personality = data.summary ? `${data.name} · ${data.title}${data.provisional ? '（暂定）' : ''}` : data.name;
-  y = block(personality, margin, y, 32, 46, contentWidth, 400, 'left', palette.muted) + 16;
   y = block(summary.comment, margin, y, 38, 56, contentWidth) + 26;
   const gridY = y;
   for (const [index, item] of (summary.values || []).entries()) {
@@ -167,10 +164,9 @@ export function drawPersonalityCard(canvas, data, { portrait, qr }) {
     traitRows.push({ x, y: rowY + 74, width: columnWidth });
   }
   if (summary.values?.length) y += Math.ceil(summary.values.length / 2) * 88 + 14;
-  const footerY = Math.max(800, y + 12);
+  const footerY = y + 12;
   const qrRect = { x: margin, y: footerY + 24, width: 224, height: 224 };
-  block('扫码开始你的人生', 326, footerY + 49, 40, 54, 690, 700);
-  block(`${data.decisionCount} 次选择 · ${summary.provisional ? '这一程，先到这里' : '一份自己的答案'}`, 326, footerY + 123, 30, 44, 690, 400, 'left', palette.muted);
+  block('扫码开始你的人生', 326, qrRect.y + (qrRect.height - 54) / 2, 40, 54, 690, 700);
   canvas.width = width;
   canvas.height = footerY + 276;
   ctx = canvas.getContext('2d');
@@ -178,7 +174,7 @@ export function drawPersonalityCard(canvas, data, { portrait, qr }) {
   ctx.fillStyle = palette.accent;
   ctx.fillRect(margin, 108, contentWidth, 2);
   ctx.fillRect(margin, footerY, contentWidth, 2);
-  ctx.drawImage(portrait, margin, 138, 244, 244);
+  ctx.drawImage(portrait, margin, portraitTop, portraitSize, portraitSize);
   ctx.fillStyle = palette.rule;
   for (const row of traitRows) ctx.fillRect(row.x, row.y, row.width, 1);
   ctx.textBaseline = 'top';
