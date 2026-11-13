@@ -4,3 +4,44 @@
 .scene-brief p + p { margin-top: .6rem; }
 .scene-brief.mission { border-inline-start: 2px solid #205543; padding-inline-start: 1rem; border-block: 0; }
 .scene-prose { white-space: pre-line; }
+
+/* Read a branch when its title is opened; keep the full scene above it. */
+::selection { background: var(--soft); color: var(--ink); }
+.skip-link:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip-link:focus { position: fixed; z-index: 2; inset: 1rem auto auto 1rem; background: var(--white); padding: 0.65rem 1rem; }
+.top { gap: 1rem; flex-wrap: wrap; }
+.top a { display: inline-flex; align-items: center; min-height: 44px; }
+.top .brand { flex: 1 1 12rem; flex-wrap: wrap; gap: 0.4rem; }
+.controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto; gap: 1rem; }
+.controls label { min-width: 0; font-size: 0.875rem; }
+.controls select { width: 100%; min-width: 0; min-height: 44px; font-size: 1rem; }
+.controls .quiet { min-height: 44px; padding-inline: 0.3rem; white-space: nowrap; }
+.options-grid { align-items: start; }
+details.option { padding-top: 0; }
+.option > summary { min-height: 44px; padding: 1rem 0; color: var(--green); }
+.option > summary h3 { display: inline; font-size: 1.125rem; line-height: 1.7; }
+.option-body { font-size: 1rem; line-height: 1.9; padding-bottom: 0.6rem; }
+.option-body p { margin: 0 0 1rem; }
+.option-body h4 { font-size: 1rem; margin: 1.5rem 0 0.5rem; }
+.option-body .echo { color: var(--ink); border-left: 1px solid var(--green); margin: 1rem 0; }
+.option-body .effect { color: var(--green); font-size: 0.875rem; }
+#tree-content > p:last-child > a { display: inline-flex; align-items: center; min-height: 44px; }
+.scene-prose { font-size: 1.0625rem; line-height: 1.9; }
+@media (max-width: 1050px) {
+  .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .controls .quiet { justify-self: start; margin: 0; }
+  .options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .top, main { padding-inline-start: max(1rem, env(safe-area-inset-left)); padding-inline-end: max(1rem, env(safe-area-inset-right)); }
+  .top { gap: 0.25rem 1rem; padding-block: 0.6rem; }
+  .top .brand { flex-basis: 100%; }
+  .intro h1 { font-size: 2.2rem; }
+  .controls, .options-grid { grid-template-columns: minmax(0, 1fr); }
+  .options-grid { gap: 1rem; }
+  .controls .quiet { justify-self: end; }
+  main { padding-block: 2rem; }
+}
+@media (orientation: landscape) {
+  .top, main { padding-inline-start: max(2.25rem, env(safe-area-inset-left)); padding-inline-end: max(2.25rem, env(safe-area-inset-right)); }
+}

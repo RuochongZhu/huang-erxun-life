@@ -12,7 +12,11 @@ const routes={student:'求学',company:'创业',employee:'企业工程',studio:'
 let samples=Array.from({length:STORY_YEARS.length},()=>[]),step=0,selected=0;
 
 function setTab(tab){
-  for(const el of document.querySelectorAll('[data-tab]'))el.setAttribute('aria-selected',String(el.dataset.tab===tab));
+  for(const el of document.querySelectorAll('[data-tab]')){
+    const active=el.dataset.tab===tab;
+    el.setAttribute('aria-selected',String(active));
+    el.tabIndex=active?0:-1;
+  }
   for(const name of ['tree','mechanics'])$(`#${name}-panel`).hidden=name!==tab;
 }
 function sampleKey(state){
@@ -55,11 +59,19 @@ function renderTree(){
   const p=getLifePortrait(base);
   $('#tree-content').innerHTML=`<section class="scene-heading"><p class="crumb">${esc(scene.date)} · 黄二勋 ${esc(scene.age)} 岁 · 可达生活样本</p><h2>${esc(scene.title)}</h2><div class="scene-brief"><p><b>${esc(scene.place)}</b></p><p>相关人物 · ${scene.people.map(p=>esc(p.name)).join('；')}</p></div><p class="scene-prose">${esc(scene.story)}</p><p class="note">${(p.commitments??[]).map(n=>`${esc(n.label)} · ${esc(n.value)}`).join('　／　')}</p>${scene.echo?`<div class="echo">往事回响 · ${esc(scene.echo)}</div>`:''}</section><div class="options-grid">${scene.options.map(option=>{
     const preview=previewChoice(base,option.id);
-    return `<article class="option"><h3>${esc(option.title)}</h3><p>${esc(option.description)}</p><p class="note">取舍 · ${esc(option.tradeoff)}</p><p class="echo">延续到后来 · ${esc(option.consequence)}</p><details><summary>展开这条生活安排的结果</summary><p>${esc(option.text)}</p><p class="effect">${esc(effects(preview.effects))}</p>${!preview.available?`<p>${esc(preview.reason)}</p>`:''}</details></article>`;
+    return `<details class="option"><summary><h3>${esc(option.title)}</h3></summary><div class="option-body"><p>${esc(option.description)}</p><p>取舍 · ${esc(option.tradeoff)}</p>${option.consequence&&option.consequence!==option.text?`<p class="echo">延续到后来 · ${esc(option.consequence)}</p>`:''}<h4>这次选择的结果</h4><p class="scene-prose">${esc(option.text)}</p><p class="effect">${esc(effects(preview.effects))}</p>${!preview.available?`<p>${esc(preview.reason)}</p>`:''}</div></details>`;
   }).join('')}</div><p><a href="./map.html">在决策地图里沿着这些选择继续走 →</a></p>`;
 }
 
-document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>setTab(button.dataset.tab)));
+const tabs=[...document.querySelectorAll('[data-tab]')];
+tabs.forEach((button,index)=>{
+  button.addEventListener('click',()=>setTab(button.dataset.tab));
+  button.addEventListener('keydown',event=>{
+    const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:event.key==='ArrowRight'?(index+1)%tabs.length:event.key==='ArrowLeft'?(index+tabs.length-1)%tabs.length:null;
+    if(next===null)return;
+    event.preventDefault();setTab(tabs[next].dataset.tab);tabs[next].focus();
+  });
+});
 $('#step-select').addEventListener('change',()=>{step=Number($('#step-select').value);selected=0;syncControls();renderTree();});
 $('#route-select').addEventListener('change',()=>{selected=Number($('#route-select').value);renderTree();});
 $('#reset-path').addEventListener('click',()=>{step=0;selected=0;syncControls();renderTree();});

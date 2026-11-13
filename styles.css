@@ -980,16 +980,16 @@ dialog { border-color: var(--rule); border-radius: 1.1rem; box-shadow: 0 18px 65
   padding: 0.65rem 0.85rem;
   border: 0;
   border-radius: var(--radius);
-  background: #ad3c1d;
+  background: var(--accent);
   color: #fffaf1;
   font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.5;
   text-align: start;
 }
-.prep-receipt-trigger:hover { background: #8b2f17; }
+.prep-receipt-trigger:hover { background: var(--accent-hover); }
 .prep-receipt-status { flex-shrink: 0; font-size: 0.75rem; font-weight: 400; }
-.prep-receipt-trigger[data-read="true"] { background: #e4e4e2; color: #515453; }
+.prep-receipt-trigger[data-read="true"] { background: #e4e4e2; color: #000; }
 .prep-receipt-trigger[data-read="true"]:hover { background: #d7d7d5; }
 .prep-receipt p { font-size: 0.95rem; line-height: 1.7; }
 .prep-receipt .prep-effects, .prep-receipt .prep-checkpoint { color: var(--muted); font-size: 0.87rem; margin-top: 0.3rem; }
@@ -1039,10 +1039,7 @@ dialog { border-color: var(--rule); border-radius: 1.1rem; box-shadow: 0 18px 65
 [data-era="if"] .reader .choice-indicator { border-color: #8494aa; }
 [data-era="if"] .reader .choice-row:has(:checked) .choice-indicator { border-color: var(--accent); }
 [data-era="if"] .option-expanded, [data-era="if"] .plan-dock { border-color: var(--rule); }
-[data-era="if"] .prep-receipt-trigger { background: #ffb095; color: #52200f; }
-[data-era="if"] .prep-receipt-trigger:hover { background: #ffc4af; }
-[data-era="if"] .prep-receipt-trigger[data-read="true"] { background: #30333a; color: #c7c9cd; }
-[data-era="if"] .prep-receipt-trigger[data-read="true"]:hover { background: #3b3e45; }
+[data-era="if"] .prep-receipt-trigger:not([data-read="true"]) { color: #112c2c; }
 [data-era="if"] .reader .result-paper { --note-muted: #a2aaba; background: #161d2b; border-color: #465068; box-shadow: 0 2px 24px #5dd9da0a; }
 [data-era="if"] .result-paper .scene-after { color: #b7bfcb; }
 [data-era="if"] .result-paper .turn-changes { border-color: var(--rule); }
@@ -1094,3 +1091,55 @@ dialog:not(.share-card-modal) .modal-head h2:focus { outline: none; }
 dialog:not(.share-card-modal) .modal-body { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 0.85rem var(--modal-inset) 1rem; }
 dialog:not(.share-card-modal) #modal-content > .actions { flex: none; border-top: 1px solid var(--rule); padding: 0.5rem var(--modal-inset); margin: 0; }
 dialog[data-kind="state"] .state-heading { margin-top: 0.75rem; }
+
+/* Reading support: quiet defaults, details only for the chosen action. */
+:root { --reading-size: 1.125rem; --reading-leading: 1.9; }
+.reader .scene-story { font-size: var(--reading-size); line-height: var(--reading-leading); max-width: 34em; text-align: start; letter-spacing: 0.015em; }
+.reader .choice-row { min-height: 3.8rem; align-items: start; }
+.reader .option-title { font-size: var(--reading-size); line-height: 1.65; }
+.reader .option-expanded { display: block; border-top: 1px solid var(--rule); margin-top: 0.7rem; padding-top: 0.7rem; }
+.reader .option-description, .reader .option-tradeoff { display: block; font-size: var(--reading-size); line-height: var(--reading-leading); text-align: start; }
+.reader .option-tradeoff { margin-top: 0.65rem; color: var(--muted); }
+.reader .option-effort { margin-top: 0.75rem; font-size: 0.875rem; }
+.reader .option-unavailable { font-size: 0.875rem; }
+.reader .plan-dock, .reader .plan-dock:has(button:enabled) { position: static; }
+.result-more { border-top: 1px solid var(--rule); margin-top: 1.3rem; padding-top: 0.4rem; }
+.result-more > summary { min-height: 2.75rem; padding-block: 0.6rem; cursor: pointer; font-family: system-ui, "PingFang SC", sans-serif; font-size: 1rem; }
+.reader .result-paper { --note-muted: var(--muted); }
+.result-paper .scene-after { color: var(--muted); }
+@media (min-width: 52rem) {
+  .reader .scene-spread { align-items: center; }
+  .reader .scene-art { width: min(100%, 25rem); }
+  .reader .option-grid { align-items: start; }
+}
+@media (max-width: 51.99rem) {
+  .reader .scene-art { width: min(100%, 13.5rem); }
+  .reader .scene-spread { gap: 1rem; }
+}
+@media (max-width: 43.99rem) {
+  .site-header .chapter-name { display: none; }
+  .reader .reader-tools { gap: 0.2rem; }
+  .reader .reader-tools .btn { min-height: 2.75rem; }
+  .reader .plan-dock .btn { min-height: 3rem; }
+  .reader .plan-feedback, .reader .plan-feedback .plan-cost { font-size: 0.95rem; }
+}
+@media (forced-colors: active) {
+  .reader .choice-row:has(:checked) { outline: 2px solid Highlight; }
+}
+/* Enabling Submit changes its foreground and background together. */
+.reader .plan-dock .btn { transition: none; }
+
+.site-footer { width: min(100%, 72rem); margin: 1.75rem auto 1rem; color: var(--muted); font-size: 0.75rem; line-height: 1.75; }
+/* Keep the card's actions reachable in short viewports and clear of phone insets. */
+.share-card-modal { --card-space: max(1rem, env(safe-area-inset-top), env(safe-area-inset-bottom)); max-height: calc(100dvh - var(--card-space) * 2); }
+.share-card-modal #modal-content { max-height: calc(100dvh - var(--card-space) * 2 - 2px); }
+.share-card-modal .modal-body { overscroll-behavior: contain; }
+@media (max-width: 380px) {
+  .share-card-footer .actions { display: grid; grid-template-columns: auto 1fr; }
+  .share-card-footer .actions > :last-child:nth-child(3) { grid-column: 1 / -1; }
+}
+@media (max-height: 480px) {
+  .share-card-modal .modal-head { padding-block: 0.65rem; }
+  .share-card-footer { padding-block: 0.5rem; }
+  .share-card-footer .actions { margin-top: 0.35rem; }
+}

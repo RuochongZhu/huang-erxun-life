@@ -1,21 +1,22 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f4f3ee"><title>黄二勋的人生可能性 · 再活一次</title>
-  <link rel="stylesheet" href="./atlas.css">
+  <link rel="stylesheet" href="./atlas.css?v=57136124dd06">
 </head>
 <body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
   <header class="top"><a class="brand" href="./index.html">再活一次 <span>／ 人生可能性</span></a><a class="back" href="./map.html">决策分叉地图 ↗</a><a class="back" href="./index.html">进入试玩 ↗</a></header>
-  <main>
+  <main id="main" tabindex="-1">
     <div class="intro"><h1>人物与分支</h1><p>这里可以查看全部选项和结果，包含剧透。新游戏共 16 站，从 1973 年走到 2036 年。</p></div>
-    <nav class="tabs" aria-label="分支全览"><button data-tab="tree" aria-selected="true">生活分支与取舍</button><button data-tab="mechanics" aria-selected="false">游戏规则</button></nav>
-    <section id="tree-panel">
-      <p class="note">每个示例都由实际引擎从开局走到这里。选择不同的生活处境，会看到不同的关系、育儿和兴趣选项。完整的分流、合流与职业转向请查看 <a href="./map.html">决策地图</a>。</p>
+    <nav class="tabs" role="tablist" aria-label="分支全览"><button id="tree-tab" data-tab="tree" role="tab" aria-controls="tree-panel" aria-selected="true">生活分支与取舍</button><button id="mechanics-tab" data-tab="mechanics" role="tab" aria-controls="mechanics-panel" aria-selected="false" tabindex="-1">游戏规则</button></nav>
+    <section id="tree-panel" role="tabpanel" aria-labelledby="tree-tab" tabindex="0">
+      <p class="note">选一个人生节点，看看不同处境下的选择。点开标题后，再读取舍与结果。完整路线见 <a href="./map.html">决策地图</a>。</p>
       <div class="controls"><label>人生节点<select id="step-select"></select></label><label>走到这里的生活<select id="route-select"></select></label><button id="reset-path" class="quiet">回到第一站</button></div>
       <div id="tree-content" aria-live="polite"><p>正在展开人生分支…</p></div>
     </section>
-    <section id="mechanics-panel" hidden>
+    <section id="mechanics-panel" role="tabpanel" aria-labelledby="mechanics-tab" tabindex="0" hidden>
       <article class="mechanics"><h2>游戏规则</h2>
       <div class="rules-grid">
         <div><h3>生活、处境与选择证据</h3><p>亲密关系、婚育安排、兴趣习惯和照护方式各自保留。精力、压力与资金是现实约束。性格从你作出的选择中观察，最后分别回看生活各方面。</p></div>
@@ -28,5 +29,5 @@
       </article>
     </section>
   </main><footer>再活一次</footer>
-  <script type="module" src="./atlas.js"></script>
+  <script type="module" src="./atlas.js?v=3e45da804fec"></script>
 </body></html>

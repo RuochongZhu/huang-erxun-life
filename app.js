@@ -265,13 +265,16 @@ function choiceRow(option, index, planItem = null, allowMultiple = false, scene 
   const copy = getChoiceCopy(game, scene, option);
   return `<label class="choice-row">
     <input class="visually-hidden" type="${extra || allowMultiple ? 'checkbox' : 'radio'}" name="${extra ? 'extra' : 'choice'}" value="${escapeHTML(option.id)}" ${planItem ? `data-plan-kind="${planItem.kind}"` : ''}
-      aria-labelledby="option-title-${index}" aria-describedby="option-description-${index}${preview.available ? '' : ` option-reason-${index}`}"
+      aria-labelledby="option-title-${index}" aria-describedby="${preview.available ? '' : `option-reason-${index}`}"
       ${preview.available ? '' : 'disabled'}>
     <span class="choice-indicator" aria-hidden="true"></span>
     <span class="option-copy">
       <span id="option-title-${index}" class="option-title">${escapeHTML(copy.title)}</span>
-      ${planItem ? `<span class="option-effort">${extra ? '配套安排' : '决定'} · ${planItem.points} 点行动额度</span>` : ''}
-      <span id="option-description-${index}" class="option-description">${escapeHTML(personal && copy.tradeoff ? copy.tradeoff : copy.description)}</span>
+      <span class="option-expanded" id="option-detail-${index}" hidden>
+        <span id="option-description-${index}" class="option-description">${escapeHTML(copy.description)}</span>
+        ${personal && copy.tradeoff ? `<span class="option-tradeoff">取舍：${escapeHTML(copy.tradeoff)}</span>` : ''}
+        ${planItem ? `<span class="option-effort">需要 ${planItem.points} 点行动额度</span>` : ''}
+      </span>
       ${preview.available ? '' : `<span id="option-reason-${index}" class="option-unavailable${extra ? ' plan-unavailable' : ''}">${escapeHTML(preview.reason || '当前无法选择')}</span>`}
     </span>
   </label>`;
@@ -305,11 +308,11 @@ function choiceForm(scene) {
     const original = personal ? scene.options : prep ? scene.prep : scene.choices;
     const multiPrimary = !!plan.multiPrimary && plan.maxPrimary > 1;
     return `<form id="choice-form" class="phase-form choice-plan" tabindex="-1">
-      <p class="plan-intro">这一步有 ${plan.budget} 点行动额度。${multiPrimary ? '可以同时推进两项相容的决定，也可以只做一项。' : '选一项主决定，还可以搭配最多两项安排。'}</p>
+      <p class="plan-intro">${multiPrimary ? '可选 1–2 项相容的决定。' : '先选 1 项决定。'}点选后看说明，再提交。</p>
       <fieldset class="options"><legend class="plan-legend">${personal ? '生活的主决定' : prep ? '这次先做的准备' : '这次的决定'}${multiPrimary ? '<span>最多选两项 · 相互冲突的安排不能一起做</span>' : ''}</legend>
         <div class="option-grid">${primary.map((item, index) => choiceRow(original.find(option => option.id === item.id) || item, index, item, multiPrimary, scene)).join('')}</div>
       </fieldset>
-      ${extras.length ? `<fieldset class="options plan-extras"><legend class="plan-legend">还想一起做的事 <span>可多选，也可以不选</span></legend>
+      ${extras.length ? `<fieldset class="options plan-extras"><legend class="plan-legend">再安排一点小事 <span>可选，最多 2 项</span><span id="extras-selection-count"></span></legend>
         <div class="option-grid">${extras.map((item, index) => choiceRow(item, primary.length + index, item, false, scene)).join('')}</div>
       </fieldset>` : ''}
       <details class="plan-outcomes" hidden><summary>查看可能的结果</summary><div id="plan-outcomes"></div></details>
@@ -334,11 +337,14 @@ function selectedPlanIds() {
 }
 
 function updateChoicePlan() {
+  syncChoiceDetails();
   const plan = getChoicePlan(game), ids = selectedPlanIds();
   if (!plan.enabled) return;
   const preview = previewChoices(game, ids);
   const primaryIds = ids.filter(id => plan.options.some(item => item.id === id && item.kind === 'primary'));
   const remaining = plan.budget - preview.points;
+  const count = document.querySelector('#extras-selection-count');
+  if (count) count.textContent = ids.length > primaryIds.length ? `已选 ${ids.length - primaryIds.length} 项` : '';
   const pairing = primaryIds.length === 2 ? plan.compatiblePairs?.find(pair => pair.ids.every(id => primaryIds.includes(id))) : null;
   const outcome = document.querySelector('#plan-outcomes');
   const outcomeDetails = outcome.closest('details');
@@ -357,23 +363,23 @@ function updateChoicePlan() {
     row.querySelector('.option-unavailable')?.remove();
     const reasonId = input.getAttribute('aria-labelledby').replace('option-title-', 'option-reason-');
     input.setAttribute('aria-describedby', input.getAttribute('aria-describedby').split(' ').filter(id => id !== reasonId).concat(reason ? [reasonId] : []).join(' '));
-    if (reason) row.querySelector('.option-copy').insertAdjacentHTML('beforeend', `<span id="${escapeHTML(reasonId)}" class="option-unavailable plan-unavailable">${escapeHTML(reason)}</span>`);
+    if (reason) row.querySelector('.option-copy').insertAdjacentHTML('beforeend', `<span id="${escapeHTML(reasonId)}" class="option-unavailable plan-unavailable${extra && !primaryIds.length ? ' visually-hidden' : ''}">${escapeHTML(reason)}</span>`);
   }
 }
 
-function combinedResultsMarkup(plan) {
+function combinedResultsMarkup(plan, readable = false) {
   const decisions = plan?.items?.filter(item => item.kind === 'primary') || [];
-  return decisions.length > 1 ? `<div class="combined-results">${decisions.map(item => `<section><h3>${escapeHTML(item.title)}</h3><p class="story-text">${escapeHTML(item.text)}</p></section>`).join('')}</div>` : '';
+  return decisions.length > 1 ? `<div class="combined-results">${decisions.map(item => `<section><h3>${escapeHTML(item.title)}</h3>${readable ? storyMarkup(item.text) : `<p class="story-text">${escapeHTML(item.text)}</p>`}</section>`).join('')}</div>` : '';
 }
 
 function resultMarkup(result) {
   const personal = game.phase === 'life-result';
   return `<section class="result result-paper" aria-labelledby="result-title">
     <h2 id="result-title" class="visually-hidden" tabindex="-1">${escapeHTML(result.label)}</h2>
-    ${combinedResultsMarkup(result.plan) || `<p class="story-text">${escapeHTML(result.text)}</p>`}
-    ${supplementResultsMarkup(result.plan)}
+    ${combinedResultsMarkup(result.plan, true) || storyMarkup(result.text)}
+    <details class="result-more"><summary>看看这次的影响</summary>${supplementResultsMarkup(result.plan)}
     ${resultImpactMarkup(result.impact, STAT_NAMES, { effects: result.effects })}
-    ${renderSectionEmotion(result, game)}
+    ${renderSectionEmotion(result, game)}</details>
   </section>
   <div class="turn-bar">${actionButton('next', personal ? '接下来' : game.step === getStepCount(game) - 1 ? '看看这些年' : '继续', 'primary large', true)}</div>`;
 }
@@ -447,6 +453,17 @@ function playMarkup(scene) {
 function storyMarkup(story) {
   const paragraphs = String(story ?? '').split(/\n+/).filter(Boolean);
   return `<div class="scene-story story-text">${paragraphs.map(paragraph => `<p>${escapeHTML(paragraph)}</p>`).join('')}</div>`;
+}
+
+function syncChoiceDetails() {
+  for (const input of document.querySelectorAll('#choice-form input')) {
+    const row = input.closest('.choice-row');
+    const expanded = row?.querySelector('.option-expanded');
+    if (!expanded) continue;
+    expanded.hidden = !input.checked;
+    const reason = row.querySelector('.option-unavailable');
+    input.setAttribute('aria-describedby', [input.checked ? expanded.id : '', reason?.id].filter(Boolean).join(' '));
+  }
 }
 
 function utilityMarkup() {
@@ -641,25 +658,21 @@ function closeModal(restoreClock = true) {
 }
 
 function newGameDialog() {
-  const details = `新一局从 ${STORY_YEARS[0]} 年到 ${STORY_YEARS.at(-1)} 年，共 ${getStepCount({ storyEdition: STORY_EDITION })} 站，启用组合行动与 2026 年第四季度开始的新 IF 剧情。${game ? '开始后，本浏览器的上次存档会被替换。' : `你将扮演${PROTAGONIST}。`}`;
+  const details = `从 ${STORY_YEARS[0]} 年到 ${STORY_YEARS.at(-1)} 年，陪${PROTAGONIST}走过 ${getStepCount({ storyEdition: STORY_EDITION })} 站人生。${game ? '开始后，将替换本浏览器的上次存档。' : '每一步，由你来选。'}`;
   openModal('new', '开始新人生', `
     <p class="subtle">${details}</p>
     <form id="nickname-form">
       <label class="field">怎么称呼你（选填）
         <input name="nickname" maxlength="32" placeholder="黄二勋" autocomplete="off" autofocus>
       </label>
-      <div class="actions">
-        ${actionButton('close', '取消')}
-        <button type="submit" class="btn primary">开始新人生</button>
-      </div>
-    </form>`);
+    </form>`, `${actionButton('close', '取消')}<button type="submit" form="nickname-form" class="btn primary">开始新人生</button>`);
 }
 
 function choiceOutcomesMarkup(preview) {
   return `<ol class="confirm-outcomes" aria-label="可能的结果">
     ${preview.outcomes.map((outcome, index) => `<li>
       <strong class="subtle">${['如果顺利', '如果有波折', '如果受挫'][index]}</strong>
-      <p>${escapeHTML(outcome.label)}</p>
+      <p>${escapeHTML(outcome.label)}${preview.probabilities?.[index] !== undefined ? ` · ${formatPercent.format(preview.probabilities[index])}` : ''}</p>
     </li>`).join('')}
   </ol>`;
 }
@@ -875,7 +888,7 @@ async function showPersonalityCard() {
     const nativeShare = canShareCard(cardCache.file);
     modalContent.innerHTML = `<div class="modal-head"><h2 id="modal-title" tabindex="-1">你的分享卡</h2></div>
       <div class="modal-body"><img class="share-card-image" src="${cardPreviewURL}" alt="${escapeHTML(card.summary.title)}。${card.summary.scored ? `总分 ${card.summary.score} / ${card.summary.maxScore}。` : ''}${escapeHTML(card.summary.comment)}。带有网站入口二维码的人生总结。">
-        <p class="share-card-help">也可以长按图片保存，或 <a href="${cardPreviewURL}" target="_blank" rel="noopener">打开原图</a>。扫码进入网站，按页面提示登录。</p>
+        <p class="share-card-help">也可以长按图片保存，或 <a href="${cardPreviewURL}" target="_blank" rel="noopener">打开原图</a>。扫码开始新人生。</p>
       </div>
       <div class="share-card-footer"><p id="card-status" class="subtle" role="status">${nativeShare ? '图片已生成，可以保存或分享。' : '图片已生成，可以保存后发给朋友。'}</p>
         <div class="actions">${actionButton('close', '关闭')}
@@ -941,6 +954,7 @@ document.addEventListener('change', event => {
   if (event.target.matches('#resource-metric, #resource-year')) { updateResourceChart(); return; }
   if (!event.target.matches('#choice-form input[name="choice"], #choice-form input[name="extra"]')) return;
   if (event.target.closest('.choice-plan')) { updateChoicePlan(); return; }
+  syncChoiceDetails();
   document.querySelector('#choose-button').disabled = false;
   document.querySelector('#choice-hint').textContent = '已选好。下一步可核对影响，再确认选择。';
 });

@@ -105,6 +105,8 @@ function setMode(next){
   mode=next;
   $('#structure-tab').setAttribute('aria-selected',String(mode==='structure'));
   $('#record-tab').setAttribute('aria-selected',String(mode==='record'));
+  $('#structure-tab').tabIndex=mode==='structure'?0:-1;
+  $('#record-tab').tabIndex=mode==='record'?0:-1;
   $('#workspace').setAttribute('aria-labelledby',mode==='record'?'record-tab':'structure-tab');
   $('#legend-selected').textContent=mode==='record'?'实际走过的路线':'当前处境与准备下的去向';
   $('#overview-note').textContent=mode==='record'?'实线与着色节点来自真实存档；未做出的选择不会补入记录。':'每年先过生活，再作事业选择；早期分流，后面可以带着不同经历合流。';
@@ -333,6 +335,12 @@ function render(){drawMap();renderRecord();renderDetail();renderWalk();}
 document.querySelectorAll('[data-site]').forEach(a=>a.href=location.protocol==='file:'?SITE+a.dataset.site:'./'+a.dataset.site);
 $('#structure-tab').onclick=()=>setMode('structure');
 $('#record-tab').onclick=()=>setMode('record');
+const mapTabs=[$('#structure-tab'),$('#record-tab')];
+mapTabs.forEach((tab,index)=>tab.addEventListener('keydown',event=>{
+  const next=event.key==='Home'?0:event.key==='End'?1:['ArrowLeft','ArrowRight'].includes(event.key)?1-index:null;
+  if(next===null)return;
+  event.preventDefault();setMode(next===0?'structure':'record');mapTabs[next].focus();
+}));
 $('#period-filter').onchange=e=>{period=e.target.value;drawMap();};
 $('#route-filter').onchange=e=>{routeFilter=e.target.value;drawMap();};
 $('#jump-node').onchange=e=>{if(mode==='record'){const i=saved.frames.findIndex(f=>nodeId(f.base)===e.target.value);selectRecord(i);}else selectSample(e.target.value);};
