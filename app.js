@@ -21,6 +21,7 @@ import {
 
 
 const SAVE_KEY = 'jensen-game-save';
+const PREP_RECEIPT_READ_KEY = 'jensen-game-prep-receipt-read';
 const LIMIT_REASON = '达到26分钟活跃游玩上限';
 const STAT_NAMES = {
   energy: '精力', stress: '压力', bonds: '合作支持', money: '资金', engineering: '工程',
@@ -55,6 +56,7 @@ let cardCache = null;
 let cardPreviewURL = null;
 let cardRequest = 0;
 let cardSharing = false;
+let viewedPrepReceipt;
 
 function resourceChartContent(key, selected) {
   const rows = key === 'lifeIndex' ? weightedLifeHistory : resourceHistory;
@@ -379,6 +381,33 @@ function supplementResultsMarkup(plan) {
   return items.length ? `<div class="supplement-results">${items.map(item => `<p><span>${escapeHTML(item.title)}</span>${escapeHTML(item.text)}</p>`).join('')}</div>` : '';
 }
 
+function prepReceiptId() {
+  return JSON.stringify([game.seed, game.name, game.storyEdition, game.step, game.actions.length, game.lastResult.title]);
+}
+
+function prepReceiptButtonMarkup() {
+  if (viewedPrepReceipt === undefined) {
+    try { viewedPrepReceipt = localStorage.getItem(PREP_RECEIPT_READ_KEY); }
+    catch { viewedPrepReceipt = null; }
+  }
+  const read = viewedPrepReceipt === prepReceiptId();
+  return `<button type="button" class="prep-receipt-trigger" data-action="prep-receipt" data-read="${read}" aria-haspopup="dialog" aria-controls="modal"><span>查看刚才的行动与影响</span><span class="prep-receipt-status">${read ? '已查看' : '未查看'}</span></button>`;
+}
+
+function showPrepReceipt() {
+  if (screen !== 'play' || game.phase !== 'choice' || !game.choicePlanEdition || !game.lastResult || dialog.open) return;
+  const result = game.lastResult;
+  openModal('prep-receipt', '刚才的准备', `<div class="prep-receipt"><p>${escapeHTML(result.title)}</p>${supplementResultsMarkup(result.plan)}<p class="prep-effects">${escapeHTML(effectText(result.effects))}</p>${(result.impact?.reactions || []).slice(0, 1).map(item => `<p class="prep-checkpoint">${escapeHTML(item.speaker)}：${escapeHTML(item.text)}</p>`).join('')}${(result.impact?.checkpoints || []).slice(0, 1).map(item => `<p class="prep-checkpoint">${escapeHTML(item.text)}</p>`).join('')}</div>`, actionButton('close', '关闭'));
+  viewedPrepReceipt = prepReceiptId();
+  try { localStorage.setItem(PREP_RECEIPT_READ_KEY, viewedPrepReceipt); }
+  catch { /* Keep the read state in memory when browser storage is unavailable. */ }
+  const button = main.querySelector('[data-action="prep-receipt"]');
+  if (button) {
+    button.dataset.read = 'true';
+    button.querySelector('.prep-receipt-status').textContent = '已查看';
+  }
+}
+
 function supplementJournalMarkup(timeline) {
   if (!timeline?.length) return '';
   return `<h3 class="career-journal-heading">那些一起做的小事</h3><ol class="journal">${timeline.map(item => `<li class="journal-entry"><details><summary>${escapeHTML(item.year)} · ${escapeHTML(item.title)}</summary><div class="journal-detail"><p>${escapeHTML(item.text)}</p><p class="subtle">${escapeHTML(effectText(item.effects))}</p></div></details></li>`).join('')}</ol>`;
@@ -406,7 +435,7 @@ function playMarkup(scene) {
       ${artworkMarkup(art)}
       <div class="scene-reading">
         ${result ? resultMarkup(result) : storyMarkup(story)}
-        ${!result && game.phase === 'choice' && game.choicePlanEdition && game.lastResult ? `<aside class="prep-receipt" aria-label="刚才的准备反馈"><h2>刚才的准备</h2><p>${escapeHTML(game.lastResult.title)}</p>${supplementResultsMarkup(game.lastResult.plan)}<p class="prep-effects">${escapeHTML(effectText(game.lastResult.effects))}</p>${(game.lastResult.impact?.reactions || []).slice(0, 1).map(item => `<p class="prep-checkpoint">${escapeHTML(item.speaker)}：${escapeHTML(item.text)}</p>`).join('')}${(game.lastResult.impact?.checkpoints || []).slice(0, 1).map(item => `<p class="prep-checkpoint">${escapeHTML(item.text)}</p>`).join('')}</aside>` : ''}
+        ${!result && game.phase === 'choice' && game.choicePlanEdition && game.lastResult ? prepReceiptButtonMarkup() : ''}
       </div>
     </div>
     ${result ? '' : `<section class="decision-stage" aria-label="你的选择">${choiceForm(scene)}</section>`}
@@ -588,7 +617,7 @@ function openModal(kind, title, body, actions = '') {
   activeDialog = kind;
   dialog.dataset.kind = kind;
   dialog.classList.toggle('share-card-modal', kind === 'card');
-  modalContent.innerHTML = `<div class="modal-head"><h2 id="modal-title"${kind === 'state' ? ' tabindex="-1" autofocus' : ''}>${escapeHTML(title)}</h2></div>
+  modalContent.innerHTML = `<div class="modal-head"><h2 id="modal-title"${['state', 'prep-receipt'].includes(kind) ? ' tabindex="-1" autofocus' : ''}>${escapeHTML(title)}</h2></div>
     <div class="modal-body">${body}</div>
     ${actions ? `<div class="actions">${actions}</div>` : ''}`;
   dialog.showModal();
@@ -889,6 +918,7 @@ const actions = {
   new: newGameDialog, resume: resumeGame, close: closeModal, commit: applyChoice,
   pause: showPause, journal: showJournal, details: showDetails, state: showState, next: nextScene,
   lifechart: showLifeChart,
+  'prep-receipt': showPrepReceipt,
   'if-ending': showIfEnding, 'if-settle': () => settleIf(false),
   'if-tragedy-confirm': confirmIfTragedy, 'if-tragedy': () => settleIf(true),
   export: exportReport, home: returnHome,
